@@ -44,6 +44,88 @@ app.use('/findToy', (req,res) => {
     }
 });
 
+
+app.use('/findAnimals', (req,res) => {
+    let query = {};
+
+    if (req.query.species || req.query.trait || req.query.gender) {
+      
+      if (req.query.species) {
+        query["species"] = req.query.species;  
+      }
+      
+      if (req.query.trait) {
+        query["traits"] = req.query.trait;
+      }
+
+      if (req.query.gender) { 
+        query["gender"] = req.query.gender;
+      }
+
+
+      Animal.find(query, (err, animals) => {
+        if (!err) {
+          if (animals.length != 0) {
+           res.json(animals);
+          }
+          else {
+            res.json({});
+          }
+        }
+      });
+    }
+    else {
+      Animal.find({}, (err, animals) => {
+        if (!err) {
+          res.json(animals);
+        }
+        else {
+          res.json({});
+        }
+      });
+    }
+});
+
+app.use('/animalsYoungerThan', (req,res) => {
+    let query = {};
+    let lt = {}
+
+    if (req.query.age) {
+      let age = parseInt(req.query.age);
+      lt["$lt"] = age;
+      query["age"] = {...lt};
+
+
+      console.log(query);
+      
+      Animal.find(query, (err, animals) => {
+        if (!err) {
+          if (animals.length != 0) {
+           let result = {};
+           let count = animals.length;
+           let names = [];
+
+           animals.forEach((animal) => {
+            names = [...names, animal.name];
+           });
+
+           result["count"] = count;
+           result["names"] = names;
+           res.json(result);
+          }
+          else {
+            res.json({count: 0});
+          }
+        }
+      });
+    }
+    else {
+      res.json({});
+    }
+});
+
+
+
 app.use('/', (req, res) => {
 	res.json({ msg : 'It works!' });
 });
