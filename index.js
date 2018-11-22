@@ -124,12 +124,77 @@ app.use('/animalsYoungerThan', (req,res) => {
     }
 });
 
+function isqty(currentvalue) {
+  currentvalue = parseInt(currentvalue);
+  if (currentvalue) {
+    return true;
+  }
+  return false;
+}
 
+app.use('/calculatePrice', (req, res, next) => {
 
-app.use('/', (req, res) => {
-	res.json({ msg : 'It works!' });
+  if (req.query.id) {
+
+    let qtys = req.query.qty;
+    let ids = req.query.id;
+
+    let inoperator = {};
+    inoperator['$in'] = ids;
+
+    let query = {};
+    query['id'] = {...inoperator};
+    
+  
+    if (!qtys.every(isqty)) {
+      res.json({"items":[],"totalPrice":0});
+      return next();
+    }
+
+    let result = {};
+     
+    let items = [];
+    let subtotals = [];
+
+    console.log(query);
+    console.log(qtys);
+
+    Toy.find(query, (err, toys) => {
+      if (err) {
+        console.log(err);
+        return next();
+      }
+      
+      for (var i = 0; i < toys.length; i++) {
+        let item = {};
+        item['id'] = toys[i].id;
+        item['qty'] = qtys[i];
+        item['subtotal'] = toys[i].price * qtys[i];
+        items = [...items, item];
+        subtotals = [...subtotals, item.subtotal];
+      }
+
+      result['items'] = items;
+      result['totalPrice'] = subtotals.reduce((total = 0, subtotal) => {
+        return total + subtotal;
+      });
+
+      return res.json(result);
+    });
+  }
+  else {
+    res.json({});
+  }
 });
 
+app.use('/', (req, res) => {
+  res.json({"sam": 'Enjoy...coding!'});
+});
+
+app.use(function (err, req, res, next) {
+  console.log(err.stack);
+  res.status(500).send('Something broke...');
+});
 
 app.listen(3000, () => {
 	console.log('Listening on port 3000');
