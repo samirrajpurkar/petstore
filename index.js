@@ -147,8 +147,7 @@ app.use('/calculatePrice', (req, res, next) => {
     
   
     if (!qtys.every(isqty)) {
-      res.json({"items":[],"totalPrice":0});
-      return next();
+      return res.json({"items":[],"totalPrice":0});
     }
 
     let result = {};
@@ -161,8 +160,7 @@ app.use('/calculatePrice', (req, res, next) => {
 
     Toy.find(query, (err, toys) => {
       if (err) {
-        console.log(err);
-        return next();
+        return console.log(err);
       }
       
       for (var i = 0; i < toys.length; i++) {
@@ -183,7 +181,7 @@ app.use('/calculatePrice', (req, res, next) => {
     });
   }
   else {
-    res.json({});
+    return res.json({});
   }
 });
 
